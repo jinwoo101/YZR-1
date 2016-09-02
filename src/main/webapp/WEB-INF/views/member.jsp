@@ -18,7 +18,8 @@
 		color:blue;
 	}
 	
-	.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th{
+	.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, 
+	.table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th{
 		vertical-align:middle;
 	}
 	
@@ -62,6 +63,7 @@
 				$('#checkTel').html("");
 				$('#checkQuestion').html("");
 				$('#checkAnswer').html("");
+				
 				if($("#member_id").val()==null || $("#member_id").val()==""){
 					$("#checkMsg").html("아이디를 입력하세요.");
 				}
@@ -110,7 +112,7 @@
 				alert("아이디가 중복되었는지 체크하세요.");
 				
 			}else{
-				alert("회원가입을 축하");
+				
 				f.submit();
 			}
 		
@@ -194,7 +196,7 @@
 							%>
 						</select>
 						<select class="form-control" id="month" name="month" >
-							<option value=""></option>
+							<option value="">월</option>
 							<%
 								for(int i=0; i<12; i++){
 									int month = 1;
@@ -204,7 +206,7 @@
 							%>
 						</select>
 						<select class="form-control" id="day" name="day" >
-							<option value=""></option>
+							<option value="">일</option>
 							<%
 								for(int i=0; i<31; i++){
 									int day = 1;

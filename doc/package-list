@@ -1,0 +1,4 @@
+net.nigne.yzrproject.controller
+net.nigne.yzrproject.domain
+net.nigne.yzrproject.persistence
+net.nigne.yzrproject.service

@@ -18,8 +18,8 @@ public interface ReplyDAO {
 
 	public void replyInsert(int reply_no,int review_no, String user_id, String reply_content, String reply_date, String reply_reply) throws Exception;
 	public void reply_Reply_Insert(int reply_no,int review_no, String user_id, String reply_content, String reply_date, String reply_reply) throws Exception;
-	public List<ReplyVO> getReply(int review_no);
 	public List<ReplyVO> getReply_Reply(int review_no);
+	public List<ReplyVO> getReply(int review_no);
 	public long getReplyCount(int review_no);
 	public List<ReplyVO> getReplyPage(int review_no, Criteria criteria);
 	public void delete_Reply(int no);

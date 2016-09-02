@@ -48,7 +48,53 @@ th{
 		</tr>
 	</table>
 	<div style="float: right;">
-		<a href="/user/qna"><input type="button" class="btn btn-danger" value="목록"></a>
+		<a href="/user/qna"><input type="button" class="btn btn-danger" value="목록" style="margin-bottom: 30px;"></a>
 	</div>
+	<div id="reply" class="reply"></div>
 </div>
+<script>
+var reno = "${qnavo.no}";
+var currentPage = 1;
+function setReplyList(data){
+	var result = "";  
+	var reply_list = null;
+	var reply_reply_list = null;
+	$(data).each(function(){
+		reply_list = this;
+				result += "<div style='margin-left:100px; margin-top:30px;'>"
+				+ "<div class='div_re_uid' id='div_re_uid' name='div_re_uid'>"
+				+ "<div style='margin-bottm: 5px; margin-left:20px; font-size:15px'>"
+				+"<b><span> 아이디 : "+ reply_list.user_id +"</span><span style=' margin-left:20px;'> 등록일  :"+ reply_list.reply_date+"</span></b></div>"
+				+"<div><textarea disabled readonly='readonly' style='10px; padding: 2px; border: 0px;width: 840px; height: 70px; font-size:18px;"
+				+"resize: none; margin-top: 5px; margin-left: 20px; background-color: white'>" + reply_list.reply_content
+				+"</textarea></div>" 
+				+ "</div>";
+	});	
+	result += "</div>";
+	document.getElementById("reply").innerHTML = result;
+}
+
+
+function getReplyList(page){
+	if(page ==null){
+		page = currentPage;
+	}
+	currentPage = page;
+	$.ajax({
+		type : 'get',
+		url : '/admin/qna/' + reno + "/"+page,
+		headers : {
+			"Content-Type" : "application/json",
+			//"X-HTTP-Method-Override" : "GET",  ----  POST 이거나 GET인경우는 생략가능
+		},
+		dataType : 'json',
+		data : '',
+		success : function(result){
+			setReplyList(result.l);
+		}
+	});
+}
+
+getReplyList(1);
+</script>
 <%@include file="../include/footer.jsp"%>

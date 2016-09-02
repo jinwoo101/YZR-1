@@ -31,10 +31,12 @@ public interface MovieDAO {
 	public List<MovieVO> getMovieList(String order);	// 예매율순, 가나다순
 	public List<MovieVO> getMovieId(String movieName);	// 무비아이디 가져오기
 	
+	public void addViewer(String movieId, int viewer);
+	public void updateReservationRate(MovieVO vo, float reservationRate);
 
+	public List<MovieVO> getPlayMovieList();
 	
-	
-	
+	public long getMovieCnt();
 	
 	
 }

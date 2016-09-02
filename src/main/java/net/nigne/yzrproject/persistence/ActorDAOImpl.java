@@ -22,8 +22,7 @@ public class ActorDAOImpl implements ActorDAO {
 	private EntityManager entityManager;
 	
 	@Override
-	public String getMovie_actor(String member_id) {
-		String actor = "";
+	public List<String> getMovie_actor(String member_id) {
 		
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<String> actorQuery = cb.createQuery(String.class);
@@ -39,9 +38,26 @@ public class ActorDAOImpl implements ActorDAO {
 		actorQuery.groupBy(actorRoot.get("actor_name"));
 		actorQuery.orderBy(cb.desc(cb.count(actorRoot.get("actor_name"))));
 		
-		TypedQuery<String> tq = entityManager.createQuery(actorQuery).setFirstResult(0).setMaxResults(1);
+		TypedQuery<String> tq = entityManager.createQuery(actorQuery);
 		
-		actor = tq.getSingleResult();
+		List<String> actor = tq.getResultList();
+		
+		return actor;
+	}
+
+	@Override
+	public List<String> getActor(String movie_id) {
+		
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<String> actorQuery = cb.createQuery(String.class);
+		Root<ActorVO> actorRoot = actorQuery.from(ActorVO.class);
+		
+		actorQuery.select(actorRoot.get("actor_name"));
+		actorQuery.where(cb.equal(actorRoot.get("movie_id"), movie_id));
+		
+		TypedQuery<String> tq = entityManager.createQuery(actorQuery);
+		
+		List<String> actor = tq.getResultList();
 		
 		return actor;
 	}

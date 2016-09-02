@@ -13,8 +13,8 @@ import net.nigne.yzrproject.domain.ReplyVO;
 import net.nigne.yzrproject.domain.ReviewVO;
 
 public interface ReplyService {
-	public List<ReplyVO> getReply(int review_no);
 	public List<ReplyVO> getReply_Reply(int review_no);
+	public List<ReplyVO> getReply(int review_no);
 	public long getReplyCount(int review_no);
 	public List<ReplyVO> getReplyPage(int review_no, Criteria criteria);
 	public void replyInsert(int reply_no,int review_no, String user_id, String reply_content, String reply_date, String reply_reply) throws Exception;

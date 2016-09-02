@@ -38,6 +38,9 @@ public class SeatVO {
 	@Column(name="start_time")
 	String start_time;
 	
+	@Column(name="current_time")
+	String current_time;
+	
 	public int getNo() {
 		return no;
 	}
@@ -101,4 +104,14 @@ public class SeatVO {
 	public void setStart_time(String start_time) {
 		this.start_time = start_time;
 	}
+
+	public String getCurrent_time() {
+		return current_time;
+	}
+
+	public void setCurrent_time(String current_time) {
+		this.current_time = current_time;
+	}
+
+
 }

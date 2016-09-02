@@ -74,6 +74,7 @@
 	
 	function buy(){
 		var frm = document.getElementById("frm");
+		var pay = $("#product_price").text();
 		
 		var IMP = window.IMP;
         IMP.init('iamport');
@@ -107,14 +108,32 @@
            
            if( rsp.success ) {
         	   alert($("#product_name").text() + " 을 구매하였습니다");
+        	   pointAdder(pay/100);
         	   frm.submit();
            } else {
+        	   pointAdder(pay/100);
         	   	alert("결제 실패하였습니다.");
         	   	frm.submit();
            }
           
         });
     }
+	
+	function pointAdder (point) {
+		var memberId = '${member_id}';
+		$.ajax({
+			type:'get',
+			url:'/member/point/' + point,
+			headers: {
+				"Content-Type" : "application/json",
+			},
+			dataType:'json',
+			data : '',
+			success : function(result){
+				
+			}
+		});	
+	}
 
 </script>
 <% session.setAttribute("menu", null);%>

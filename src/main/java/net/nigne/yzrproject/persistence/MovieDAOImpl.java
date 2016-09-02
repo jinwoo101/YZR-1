@@ -35,6 +35,7 @@ import net.nigne.yzrproject.domain.GenreVO;
 import net.nigne.yzrproject.domain.GpaVO;
 import net.nigne.yzrproject.domain.MovieVO;
 import net.nigne.yzrproject.domain.ReservationVO;
+import net.nigne.yzrproject.domain.SeatVO;
 
 @Repository
 public class MovieDAOImpl implements MovieDAO {
@@ -63,7 +64,7 @@ public class MovieDAOImpl implements MovieDAO {
 		// 회원 아이디로 예매내역에 있는 영화들의 장르중 가장 많이 본 장르 가져오기
 		
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-		CriteriaQuery<GenreVO> genreQuery = cb.createQuery(GenreVO.class);
+		CriteriaQuery<String> genreQuery = cb.createQuery(String.class);
 		Root<GenreVO> genreRoot = genreQuery.from(GenreVO.class);
 		
 		Subquery<ReservationVO> subQuery = genreQuery.subquery(ReservationVO.class);
@@ -99,10 +100,9 @@ public class MovieDAOImpl implements MovieDAO {
 			genreQuery.groupBy(genreRoot.get("movie_genre"));
 			genreQuery.orderBy(cb.desc(cb.count(genreRoot.get("movie_genre"))));
 			
-			TypedQuery<GenreVO> tq = entityManager.createQuery(genreQuery);
+			TypedQuery<String> tq = entityManager.createQuery(genreQuery);
 			
-			List<GenreVO> genre_list = tq.getResultList();
-			
+			List<String> genre_list = tq.getResultList();
 			// 가장 많이본 장르에 해당하는 영화들의 개봉날짜를 기준으로 최신 영화를 뽑아낸다
 			
 			CriteriaQuery<MovieVO> movieQuery = cb.createQuery(MovieVO.class);
@@ -120,8 +120,8 @@ public class MovieDAOImpl implements MovieDAO {
 			TypedQuery<MovieVO> mtq = entityManager.createQuery(movieQuery);
 			genre_movie = mtq.getResultList();
 		
-			if(genre_movie.isEmpty()){
-				for(int g=0; g<genre_list.size(); g++){
+			if(genre_movie.isEmpty() || res_movie_id.contains(genre_movie.get(0).getMovie_id())){
+				Loop0: for(int g=0; g<genre_list.size(); g++){
 					genreSubQuery.select(genreSubQueryRoot.get("movie_id"));
 					genreSubQuery.where(cb.equal(genreSubQueryRoot.get("movie_genre"), genre_list.get(g)));
 					
@@ -130,8 +130,10 @@ public class MovieDAOImpl implements MovieDAO {
 					
 					mtq = entityManager.createQuery(movieQuery);
 					genre_movie = mtq.getResultList();
-					if(!genre_movie.isEmpty()){
-						break;
+					for(int g2=0; g2<genre_movie.size(); g2++){
+						if(!genre_movie.isEmpty() && !res_movie_id.contains(genre_movie.get(g2).getMovie_id())){
+							break Loop0;
+						}
 					}
 				}
 			}
@@ -145,13 +147,15 @@ public class MovieDAOImpl implements MovieDAO {
 		// 회원 아이디로 예매내역에 있는 영화중 가장 많이 본 배우 가져오기
 		
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-		CriteriaQuery<ActorVO> actorQuery = cb.createQuery(ActorVO.class);
+		CriteriaQuery<String> actorQuery = cb.createQuery(String.class);
 		Root<ActorVO> actorRoot = actorQuery.from(ActorVO.class);
 		
 		Subquery<ReservationVO> subQuery = actorQuery.subquery(ReservationVO.class);
 		Root<ReservationVO> subQueryRoot = subQuery.from(ReservationVO.class);
 		subQuery.select(subQueryRoot.get("movie_id"));
 		subQuery.where(cb.equal(subQueryRoot.get("member_id"), member_id));
+		
+		// 예외처리 구간
 		
 		CriteriaQuery<String> resQuery = cb.createQuery(String.class);
 		Root<ReservationVO> resRootQuery = resQuery.from(ReservationVO.class);
@@ -161,9 +165,8 @@ public class MovieDAOImpl implements MovieDAO {
 		TypedQuery<String> restq = entityManager.createQuery(resQuery);
 		List<String> res_movie_id = restq.getResultList();
 		
-		// 예외처리 구간
-		
 		List<MovieVO> actor_movie = null;
+		
 		if(res_movie_id.isEmpty()){
 			CriteriaQuery<MovieVO> Query = cb.createQuery(MovieVO.class);
 			Root<MovieVO> Root = Query.from(MovieVO.class);
@@ -182,9 +185,9 @@ public class MovieDAOImpl implements MovieDAO {
 			actorQuery.groupBy(actorRoot.get("actor_name"));
 			actorQuery.orderBy(cb.desc(cb.count(actorRoot.get("actor_name"))));
 			
-			TypedQuery<ActorVO> tq = entityManager.createQuery(actorQuery);
+			TypedQuery<String> tq = entityManager.createQuery(actorQuery);
 			
-			List<ActorVO> actor_list = tq.getResultList();
+			List<String> actor_list = tq.getResultList();
 			
 			// 가장 많이본 배우에 해당하는 영화들의 개봉날짜를 기준으로 최신 영화를 뽑아낸다
 			
@@ -203,19 +206,20 @@ public class MovieDAOImpl implements MovieDAO {
 			TypedQuery<MovieVO> mtq = entityManager.createQuery(movieQuery);
 			actor_movie = mtq.getResultList();
 			
-			if(actor_movie.isEmpty()){
-				for(int a=0; a<actor_list.size(); a++){
-					actorSubQuery.select(actorSubQueryRoot.get("movie_id"));
-					actorSubQuery.where(cb.equal(actorSubQueryRoot.get("actor_name"), actor_list.get(a)));
-					
-					movieQuery.where(cb.and(movieRoot.get("movie_id").in(actorSubQuery), cb.equal(movieRoot.get("status"), "play")));
-					movieQuery.orderBy(cb.desc(movieRoot.get("open_date")));
-					
-					mtq = entityManager.createQuery(movieQuery);
-					actor_movie = mtq.getResultList();
-					if(!actor_movie.isEmpty()){
-						break;
-					}
+			if(actor_movie.isEmpty() || res_movie_id.contains(actor_movie.get(0).getMovie_id())){
+				Loop1:  for(int a=0; a<actor_list.size(); a++){
+						actorSubQuery.select(actorSubQueryRoot.get("movie_id"));
+						actorSubQuery.where(cb.equal(actorSubQueryRoot.get("actor_name"), actor_list.get(a)));
+						
+						movieQuery.where(cb.and(movieRoot.get("movie_id").in(actorSubQuery), cb.equal(movieRoot.get("status"), "play")));
+						movieQuery.orderBy(cb.desc(movieRoot.get("open_date")));
+						mtq = entityManager.createQuery(movieQuery);
+						actor_movie = mtq.getResultList();
+						for(int a2=0; a2<actor_movie.size(); a2++){
+							if(!actor_movie.isEmpty() && !res_movie_id.contains(actor_movie.get(a2).getMovie_id())){
+								break Loop1;
+							}
+						}
 				}
 			}
 		}
@@ -228,7 +232,7 @@ public class MovieDAOImpl implements MovieDAO {
 		// 회원 아이디로 예매내역에 있는 영화들의 감독중 가장 많이 본 장르 가져오기
 		
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-		CriteriaQuery<DirectorVO> directorQuery = cb.createQuery(DirectorVO.class);
+		CriteriaQuery<String> directorQuery = cb.createQuery(String.class);
 		Root<DirectorVO> directorRoot = directorQuery.from(DirectorVO.class);
 		
 		Subquery<ReservationVO> subQuery = directorQuery.subquery(ReservationVO.class);
@@ -266,9 +270,9 @@ public class MovieDAOImpl implements MovieDAO {
 			directorQuery.groupBy(directorRoot.get("director_name"));
 			directorQuery.orderBy(cb.desc(cb.count(directorRoot.get("director_name"))));
 			
-			TypedQuery<DirectorVO> tq = entityManager.createQuery(directorQuery);
+			TypedQuery<String> tq = entityManager.createQuery(directorQuery);
 			
-			List<DirectorVO> director_list = tq.getResultList();
+			List<String> director_list = tq.getResultList();
 			
 			// 가장 많이본 감독에 해당하는 영화들의 개봉날짜를 기준으로 최신 영화를 뽑아낸다
 			
@@ -286,19 +290,20 @@ public class MovieDAOImpl implements MovieDAO {
 			
 			TypedQuery<MovieVO> mtq = entityManager.createQuery(movieQuery);
 			director_movie = mtq.getResultList();
-		
-			if(director_movie.isEmpty()){
-				for(int d=0; d<director_list.size(); d++){
+			
+			if(director_movie.isEmpty() || res_movie_id.contains(director_movie.get(0).getMovie_id())){
+				Loop2 : for(int d=0; d<director_list.size(); d++){
 					directorSubQuery.select(directorSubQueryRoot.get("movie_id"));
 					directorSubQuery.where(cb.equal(directorSubQueryRoot.get("director_name"), director_list.get(d)));
-					
 					movieQuery.where(cb.and(movieRoot.get("movie_id").in(directorSubQuery), cb.equal(movieRoot.get("status"), "play")));
 					movieQuery.orderBy(cb.desc(movieRoot.get("open_date")));
 					
 					mtq = entityManager.createQuery(movieQuery);
 					director_movie = mtq.getResultList();
-					if(!director_movie.isEmpty()){
-						break;
+					for(int d2=0; d2<director_movie.size(); d2++){
+						if(!director_movie.isEmpty() && !res_movie_id.contains(director_movie.get(d2).getMovie_id())){
+							break Loop2;
+						}
 					}
 				}
 			}
@@ -508,6 +513,57 @@ public class MovieDAOImpl implements MovieDAO {
 		List<MovieVO> list = tq.getResultList();
 		
 		return list;
+	}
+
+
+	@Override
+	public void addViewer(String movieId, int viewer) {
+		// TODO Auto-generated method stub
+		MovieVO movieVO = entityManager.find(MovieVO.class, movieId);
+		
+		MovieVO mergeVO = entityManager.merge(movieVO);
+		mergeVO.setReservation_cnt(viewer);
+	}
+
+	@Override
+	public long getMovieCnt() {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> mainQuery = cb.createQuery(Long.class);
+		Root<MovieVO> mainQueryroot = mainQuery.from(MovieVO.class);
+		
+		
+		mainQuery.select(cb.count(mainQueryroot));
+		mainQuery.where(cb.equal(mainQueryroot.get("status"), "play"));
+		
+		
+		TypedQuery<Long> tq = entityManager.createQuery(mainQuery);
+
+		return tq.getSingleResult();
+	}
+
+	@Override
+	public List<MovieVO> getPlayMovieList() {
+		// TODO Auto-generated method stub
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<MovieVO> mainQuery = cb.createQuery(MovieVO.class);
+		Root<MovieVO> mainQueryroot = mainQuery.from(MovieVO.class);
+		
+		
+		mainQuery.select(mainQueryroot).orderBy(cb.desc(mainQueryroot.get("movie_id")));
+		mainQuery.where(cb.equal(mainQueryroot.get("status"), "play"));
+		
+		
+		TypedQuery<MovieVO> tq = entityManager.createQuery(mainQuery);
+		List<MovieVO> list = tq.getResultList();
+		
+		return list;
+	}
+
+	@Override
+	public void updateReservationRate(MovieVO vo, float reservationRate) {
+		// TODO Auto-generated method stub
+		MovieVO mergeVO = entityManager.merge(vo);
+		mergeVO.setReservation_rate(reservationRate);
 	}
 
 	

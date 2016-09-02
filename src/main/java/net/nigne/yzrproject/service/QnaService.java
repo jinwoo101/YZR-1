@@ -24,5 +24,6 @@ public interface QnaService {
 	public long getSearchTotal(String member_id,String search);
 	public MemberVO getMember(String member_id);
 	public QnaVO getQna(int no);
+
 	
 }

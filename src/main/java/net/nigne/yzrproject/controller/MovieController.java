@@ -2,6 +2,7 @@ package net.nigne.yzrproject.controller;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -129,6 +130,43 @@ public class MovieController {
 		return entity;
 	}
 	
-	
+	@RequestMapping(value = "/movie/viewAdder/{movieId}/{seatCnt}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String, Object>> viewer(@PathVariable("movieId") String movieId,
+													 @PathVariable("seatCnt") int seatCnt
+			) {
+		ResponseEntity<Map<String, Object>> entity = null;
+		
+		try{
+			System.out.println("11111");
+			int viewer = movie_service.getList(movieId).getReservation_cnt();
+			int totalViewer = 0;
+			float avrReservation = 0;
+			System.out.println(viewer);
+			System.out.println(seatCnt);
+			viewer += seatCnt;
+			System.out.println(viewer);
+			//브라우저로 전송한다
+			movie_service.addViewer(movieId, viewer);
+			int movieCnt = (int)movie_service.getMovieCnt();
+			
+			for(int i = 0; i < movieCnt; i++) {
+				totalViewer += movie_service.getPlayMovieList().get(i).getReservation_cnt();
+			}
+			
+			System.out.println("총 관객수 = " + totalViewer);
+			
+			for(int i = 0; i < movieCnt; i++) {
+				avrReservation = (float)(movie_service.getPlayMovieList().get(i).getReservation_cnt() / (float)totalViewer) * 100;
+				movie_service.updateReservationRate(movie_service.getPlayMovieList().get(i), avrReservation);
+			}
+			
+			entity = new ResponseEntity<>(HttpStatus.OK);
+			
+		} catch(Exception e){
+			entity = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		
+		return entity;
+	}
 	
 }

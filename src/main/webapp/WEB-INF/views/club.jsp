@@ -4,6 +4,11 @@
 <%@include file="./include/header.jsp"%>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<c:if test="${ member_id == null }">
+	<script>
+		<%response.sendRedirect("/login");%>
+	</script>
+</c:if>
 <div id="wrap_content" style="min-height: 100%; position: relative;">
 	<div id="content">
 		<div style="margin-left: 10px;">

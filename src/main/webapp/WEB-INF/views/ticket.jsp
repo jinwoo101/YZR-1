@@ -3,6 +3,7 @@
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@include file="./include/header.jsp" %>
 <script type="text/javascript" src="https://service.iamport.kr/js/iamport.payment-1.1.0.js"></script>
 <c:if test="${ member_id == null }">
@@ -10,6 +11,7 @@
 		<%response.sendRedirect("/login");%>
 	</script>
 </c:if>
+<fmt:formatDate value="${today}" pattern="yyyy-MM-dd HH:mm" var="today"/>
 	<style>
 
 	.nonInput>div{
@@ -184,14 +186,14 @@
 	.timetable_time{
 		border: 1px solid #999;
 		float: left;
-		margin-left: 15px;
+		margin-left: 10px;
 		margin-right: 3px;
 		margin-bottom: 5px;
 	}
 	
 	.timetable_seat{
 		color: #6B9900;
-		margin-right: 10px;
+		
 		float: left;
 	}
 	
@@ -380,6 +382,11 @@
 		cursor:pointer;
 	}
 	
+	.seat_reservation_proceed {
+		background-color: black;
+		color:white;
+	}
+	
 	.seat_clicked{
 		width: 25px;
 		height: 25px;
@@ -515,7 +522,7 @@
 	#selected_movie {
 		color: #fff;
 		font-weight: bold;
-		font-size: 30pt;
+		font-size: 25pt;
 		margin-top: 80px;
 		float: left;
 		margin-right: 15px;
@@ -527,7 +534,7 @@
 	#selected_theater	{
 		 color: #fff;
 		 font-weight: bold;
-		 font-size: 30pt;
+		 font-size: 25pt;
 		 margin-top: 80px;
 		 float: left;
 		 margin-right: 15px;
@@ -538,7 +545,7 @@
 	#etc {
 		 color: #fff;
 		 font-weight: bold;
-		 font-size: 30pt;
+		 font-size: 25pt;
 		 margin-top: 80px;
 		 float: left;
 	}
@@ -590,7 +597,7 @@
 	
 	#discount_content {
 		background-color: #FEF0E4;
-		height: 300px;
+		height: 100px;
 		width: 100%;
 	}
 	
@@ -616,11 +623,6 @@
 		color: #02283D;
 		font-size: 20px;
 		font-weight: bold;
-	}
-	
-	#discount_coupon>div>div {
-		float: right;
-		margin-right: 10%;
 	}
 	
 	#discount_coupon>div>div>button {
@@ -695,6 +697,7 @@
 	
 	.couponList {
 		clear:both;
+		padding:5px;
 	}
 	
 	.couponList>div {
@@ -786,6 +789,23 @@
 	#reservation1, #reservation2, #reservation {
 		width: 1140px;
 		margin: 0px auto;
+	}
+	
+	.modal.modal-center {
+		text-align: center;
+	}
+	
+	.modal.modal-center:before {
+		display: inline-block;
+		vertical-align: middle;
+		content: " ";
+		height: 100%;
+	}
+	
+	.modal-dialog.modal-center {
+		display: inline-block;
+		text-align: left;
+		vertical-align: middle;
 	}
 
 
@@ -962,7 +982,7 @@
 					<div style="margin-top: 10px;">
 						<span id="plex" style="font-size: 12pt; font-weight: bolder;"></span>
 						(총&nbsp;<span id="seat_totcnt">0</span>석)
-						<span style="font-size: 12pt;">21:30 - 23:38</span>
+						<span id="current_time" style="font-size: 12pt;">21:30 - 23:38</span>
 						(잔여 <span id="remainSeat">132석</span>)
 					</div>
 				</td>
@@ -990,29 +1010,38 @@
 		<div id="discount_method1" class="discount_method">STEP 1</div>
 		<div id="discount_method2" class="discount_method">할인수단 선택</div>
 		<div id="discount_method3" class="discount_method"><span id="resetBtn">다시하기</span></div>
-		<div id="discount_title" class="discount_title">CGV 할인쿠폰 <span>/</span> CJ ONE 포인트</div>
+		<div id="discount_title" class="discount_title">CGV 할인쿠폰 </div>
 		<div id="discount_content">
 			<div id="discount_coupon">
 				<div>
-					<span>●CGV 할인쿠폰</span><input type="button" class="btn btn-warning" onclick="discountApply()" style="margin-left: 5px;" value="사용하기"><input type="button" class="btn btn-warning" onclick="discountCancel()" style="margin-left: 5px;" value="취소하기">
+					<span>●CGV 할인쿠폰</span><input type="button" class="btn btn-warning" onclick="discountList()" style="margin-left: 5px;" value="쿠폰목록"><input type="button" class="btn btn-warning" onclick="discountCancel()" style="margin-left: 5px;" value="취소하기">
 				</div>
-				<div id="coupon_title1" class="coupon_title">사용가능 쿠폰</div><div id="coupon_title2" class="coupon_title">&nbsp;</div>
+				<div class="modal modal-center fade" id="myModal" role="dialog" style="margin: 0 auto;">
+					<div class="modal-dialog modal-sm modal-center">
+						<div class="modal-content">
+							<c:choose>
+								<c:when test="${fn:length(couponList)>0 }">
+									<c:forEach items="${ couponList }" var="coupon_list">
+										<c:if test="${coupon_list.member_id == member_id && coupon_list.used == 'N'}">
+												<label class="couponList">
+													<input type="radio" class="coupon" name="coupon" value="${coupon_list.no}/${coupon_list.coupon_amount}">
+													<div>${coupon_list.coupon_amount}% 할인쿠폰 </div>
+												</label>
+										</c:if>
+									</c:forEach>
+								</c:when>
+								<c:otherwise>
+									<div>사용 가능한 CGV할인쿠폰이 없습니다.</div>
+								</c:otherwise>
+							</c:choose>
+							<div class="modal-footer" style="border: 0px;">
+								<button type="button" class="btn btn-warning" onclick="discountApply()" data-dismiss="modal">사용하기</button>
+							</div>
+						</div>
+					</div>
+				</div>
 				<div id="coupon_content">
-				<c:choose>
-					<c:when test="${fn:length(couponList)>0 }">
-						<c:forEach items="${ couponList }" var="coupon_list">
-							<c:if test="${coupon_list.member_id == member_id && coupon_list.used == 'N'}">
-									<label class="couponList">
-										<input type="radio" class="coupon" name="coupon" value="${coupon_list.no}/${coupon_list.coupon_amount}">
-										<div>${coupon_list.coupon_amount}% 할인쿠폰 </div>
-									</label>
-							</c:if>
-						</c:forEach>
-					</c:when>
-					<c:otherwise>
-						<div>사용 가능한 CGV할인쿠폰이 없습니다.</div>
-					</c:otherwise>
-				</c:choose>
+				
 				</div>
 			</div>
 		</div>
@@ -1111,7 +1140,7 @@
 		<div id="nextArea3"><button id="nextBtn3" onclick="payment()"><span>&gt;</span><br/>결제하기</button></div>
 	</div>
 	
-	<form id="frm" name="frm" method="post" action="/reservation">
+	<form id="frm" name="frm">
 		<input type="text" id="movie" name="movie" size="50" maxlength="100" style="display:none;">
 		<input type="text" id="theater" name="theater" size="50" maxlength="100" style="display:none;">
 		<input type="text" id="years" name="year" size="50" maxlength="100" style="display:none;">
@@ -1128,6 +1157,7 @@
 		<input type="text" id="seat6" name="seat6" size="50" maxlength="100" style="display:none;">
 		<input type="text" id="seat7" name="seat7" size="50" maxlength="100" style="display:none;">
 		<input type="text" id="seat8" name="seat8" size="50" maxlength="100" style="display:none;">
+		<input type="text" id="seat9" name="seat9" size="50" maxlength="100" style="display:none;">
 		<c:choose>
 			<c:when test="${tempInfo.dataFlag != null}">
 				<script>
@@ -1463,49 +1493,53 @@
 					
 					var totalSeatNum = this.plex_seat_cnt;
 						$(time).each(function() {
-
-							if(dataFlag == 0 || dataFlag == 2){
 							
-								result += '<div id="time" onclick="timetable(' + "'" + this.start_time.substring(11,16) + "',  " 
-										+ "'" + this.plex_number + "'," + "'" + totalSeatNum + "'" +');"><span class="timetable_time">' 
-										+ this.start_time.substring(11,16) + '</span><div class="timetable_seat">';
-										
-								timetableTime = this.start_time;
-								$(extraSeatNum).each(function() {
-									if(timetableTime == this.startTime){
-										result += this.extraSeatCount +'석</div></div>';
-									}
-								});
-							} else {
-								var compareStartTime = startTime.substring(11,16);
-
-								if(compareStartTime == this.start_time.substring(11,16)){
-									result += '<div id="time" onclick="timetable(' + "'" + this.start_time.substring(11,16) + "',  " 
-											+ "'" + this.plex_number + "'," + "'" + totalSeatNum + "'" +');"><span class="timetable_time select">' 
-											+ this.start_time.substring(11,16) + '</span><div class="timetable_seat">';
-							
-									timetableTime = this.start_time;
-									$(extraSeatNum).each(function() {
-										if(timetableTime == this.startTime){
-											result += this.extraSeatCount +'석</div></div>';
-										}
-									});
-									timetable(this.start_time.substring(11,16), this.plex_number, totalSeatNum)
-								} else {
+							if(this.start_time > "${today}"){
+								
+								if(dataFlag == 0 || dataFlag == 2){
+									
 									result += '<div id="time" onclick="timetable(' + "'" + this.start_time.substring(11,16) + "',  " 
 											+ "'" + this.plex_number + "'," + "'" + totalSeatNum + "'" +');"><span class="timetable_time">' 
 											+ this.start_time.substring(11,16) + '</span><div class="timetable_seat">';
-							
+											
 									timetableTime = this.start_time;
 									$(extraSeatNum).each(function() {
 										if(timetableTime == this.startTime){
 											result += this.extraSeatCount +'석</div></div>';
 										}
 									});
+								} else {
+									var compareStartTime = startTime.substring(11,16);
+
+									if(compareStartTime == this.start_time.substring(11,16)){
+										result += '<div id="time" onclick="timetable(' + "'" + this.start_time.substring(11,16) + "',  " 
+												+ "'" + this.plex_number + "'," + "'" + totalSeatNum + "'" +');"><span class="timetable_time select">' 
+												+ this.start_time.substring(11,16) + '</span><div class="timetable_seat">';
+								
+										timetableTime = this.start_time;
+										$(extraSeatNum).each(function() {
+											if(timetableTime == this.startTime){
+												result += this.extraSeatCount +'석</div></div>';
+											}
+										});
+										timetable(this.start_time.substring(11,16), this.plex_number, totalSeatNum)
+									} else {
+										result += '<div id="time" onclick="timetable(' + "'" + this.start_time.substring(11,16) + "',  " 
+												+ "'" + this.plex_number + "'," + "'" + totalSeatNum + "'" +');"><span class="timetable_time">' 
+												+ this.start_time.substring(11,16) + '</span><div class="timetable_seat">';
+								
+										timetableTime = this.start_time;
+										$(extraSeatNum).each(function() {
+											if(timetableTime == this.startTime){
+												result += this.extraSeatCount +'석</div></div>';
+											}
+										});
+									}
 								}
+								
+								document.getElementById("timetable").innerHTML = result;
 							}
 							
-							document.getElementById("timetable").innerHTML = result;
 						});
 					number++;
 				});
@@ -1513,14 +1547,18 @@
 		
 		}
 		
-		
+		// 여기여기
 		function timetable(time, plex ,totalSeatNum){
 			
 			var remainSeatNum = $(event.target).parent().children('DIV').text();
-			
+			endTimeGenerate(time,120);
+			var Alltime = time + " - " + endTime;
 			$("#remainSeat").text(remainSeatNum);
 			$("#seat_totcnt").text(totalSeatNum);
+			$("#current_time").text(Alltime);
 			
+			
+					
 			if(event.target.nodeName == 'SPAN'){
 				
 				$(event.target).parent().parent().children().find('SPAN').removeClass("select");
@@ -1559,8 +1597,8 @@
 			}
 			
 			var date = document.getElementById("date"+i).value;
-			frm.years.value = $('#year').val();
-			frm.months.value = $('#month').val();
+			frm.years.value = $('#year'+i).val();
+			frm.months.value = $('#month'+i).val();
 			frm.dates.value = date;
 			checkDate = true;
 			interval();
@@ -1589,7 +1627,9 @@
 			var compareDate = startTime.substring(8,10);
 			
 			for(i=0;i<10;i++){
-				result += "<div id='dateSection"+i+"' class='calender' onclick='dateSelect("+ i +")'>" 
+				result += '<div style="text-align: center; font-size: 15pt; display:none; margin-bottom:20px;" id = "year'+i+'"></div>'
+						+ '<div style="margin-top: -20px; text-align: center; font-size: 30pt; display:none; margin-bottom:20px;" id = "month'+i+'"></div>'
+						+ "<div id='dateSection"+i+"' class='calender' onclick='dateSelect("+ i +")'>" 
 						+ "<span style='float: left; font-size: 13pt; margin-right: 5px; font-weight: bold' id='day" + i 
 						+ "'></span>" + "<span style='float: left; font-size: 13pt; font-weight: bold;' id='date" + i 
 						+ "'></span>" + "</div>";
@@ -1601,17 +1641,31 @@
 				date = now.getDate();
 				day = now.getDay();
 				month = now.getMonth()+1;
+				year = now.getFullYear();
 				
 				if(compareDate == date) {
 					
 					$("#dateSection"+i).addClass("select");
 				}
-		
+				document.getElementById("year"+i).innerHTML = year;
+				document.getElementById("year"+i).value = year;
+				document.getElementById("month"+i).innerHTML = month;
+				document.getElementById("month"+i).value = month;
+				
 				document.getElementById("date"+i).innerHTML = date;
 				document.getElementById("date"+i).value = date;
 				document.getElementById("day"+i).innerHTML = week[now.getDay()];
 				document.getElementById("day"+i).value = week[now.getDay()];
 				now.setDate(now.getDate()+1);
+				
+				if($("#date"+i).val() == 1) {
+					$("#year"+i).css("display","block");
+					$("#year"+i).css("margin-top","25px");
+					$("#month"+i).css("display","block");
+					$("#year").css("display","none");
+					$("#month").css("display","none");
+					
+				}
 				
 				if($("#day"+i).val() == '토'){
 					$("#day"+i).addClass("Saturday");
@@ -2893,7 +2947,9 @@
 		
 		//reservation3
 		
-		
+		function discountList() {
+			$('#myModal').modal('show');
+		}
 		
 		
 		function discountApply() {
@@ -2998,8 +3054,10 @@
 			
 			$(reservationExist).each(function() {
 		
-				if(this == 1) {
-					reservationFlag = false
+				if(this == 1 || this == 2) {
+					reservationFlag = false;
+					alert("다른 이용자가 예약중입니다");
+					resetFirst();
 				}
 		
 			});
@@ -3007,7 +3065,8 @@
 			
 			if(reservationFlag == true) {
 				
-				reservationSeat();
+				tempReservationSeat();
+				
 				
 				var memberId = '${member_id}';
 				var payMethod = $("#payMethod").val();
@@ -3026,8 +3085,10 @@
 						if($("#seat"+(i+1)).val() != "")
 						seatAll	+= ', ';
 					}
-				}			
-		
+				}
+				
+				
+
 				var IMP = window.IMP;
 				IMP.init('iamport');
 				
@@ -3060,11 +3121,16 @@
 						var msg = '결제가 완료되었습니다.';
 						msg += '상점 거래ID : ' + rsp.reservationCode;
 						msg += '결제 금액 : ' + rsp.pay;
+						
+						reservationSeat();
+
 						reservationCodeInput();
 						
 						if(couponApply){
 							couponUsed();
 						}
+						pointAdder(pay/100);
+						movieViewAdder(movieId, totalSeat);
 						goLastpage();
 						
 					} else {
@@ -3081,6 +3147,38 @@
 			}
 			
 			
+		}
+		
+		function movieViewAdder(movieId, seatCnt) {
+			
+			$.ajax({
+				type:'get',
+				url:'/movie/viewAdder/' + movieId + '/' + seatCnt,
+				headers: {
+					"Content-Type" : "application/json",
+				},
+				dataType:'json',
+				data : '',
+				success : function(result){
+					
+				}
+			});	
+		}
+		
+		function pointAdder (point) {
+			var memberId = '${member_id}';
+			$.ajax({
+				type:'get',
+				url:'/member/point/' + point,
+				headers: {
+					"Content-Type" : "application/json",
+				},
+				dataType:'json',
+				data : '',
+				success : function(result){
+					
+				}
+			});	
 		}
 		
 		function reservationCodeInput() {
@@ -3137,7 +3235,7 @@
 				if($("#seat"+i).val() != ""){
 					seatAll += $("#seat"+i).val()
 					if($("#seat"+(i+1)).val() != "")
-					seatAll	+= ', ';
+					seatAll	+= ',';
 				}
 			}			
 
@@ -3300,6 +3398,32 @@
 			});
 		}
 		
+		function tempReservationSeat() {
+			
+			if(frm.months.value < 10 && frm.months.value.length < 2 ){
+				frm.months.value = '0' + frm.months.value;
+			}
+			
+			if(frm.dates.value < 10 && frm.dates.value.length < 2){
+				frm.dates.value = '0' + frm.dates.value;
+			}
+			
+			startTime = frm.years.value +'-' + frm.months.value + '-' + frm.dates.value + ' ' + frm.start_time.value;
+			
+			$.ajax({
+				type:'get',
+				url:'/ticket/' + theaterId +'/' + plexNum + '/tempseat/' + startTime,
+				headers: {
+					"Content-Type" : "application/json",
+				},
+				dataType:'json',
+				data : {"seat1":seat1, "seat2":seat2, "seat3":seat3, "seat4":seat4, "seat5":seat5, "seat6":seat6, "seat7":seat7, "seat8":seat8},
+				success : function(result){
+					setSeat(result.l, result.i);
+				}
+			});
+		}
+		
 		function reservationCancel() {
 		
 			if(frm.months.value < 10 && frm.months.value.length < 2 ){
@@ -3369,7 +3493,7 @@
 		
 			$.ajax({
 				type:'get',
-				url:'/ticket/plex/' + plexNum + '/' + startDay,
+				url:'/ticket/plex/' + theaterId + '/' + plexNum + '/' + startDay,
 				headers: {
 					"Content-Type" : "application/json",
 					"X-HTTP-Method-Override" : "GET",
@@ -3403,6 +3527,8 @@
 							result += "<td id='" + this.seat_index + this.seat_number + "' class='seat_" + this.seat_type + " seat_nonselect'>" + this.seat_number+ "</td>";
 						} else if(this.reservation_exist == '1') {
 							result += "<td id='" + this.seat_index + this.seat_number + "' class='seat_reservation seat_nonselect'>" + this.seat_number+ "</td>";
+						} else if(this.reservation_exist == '2') {
+							result += "<td id='" + this.seat_index + this.seat_number + "' class='seat_reservation seat_nonselect seat_reservation_proceed'>" + this.seat_number+ "</td>";
 						} else if(this.seat_type == 'sweetbox') {
 							result += "<td id='" + this.seat_index + this.seat_number + "' class='seat_" + this.seat_type + " sweet_color'>" + this.seat_number+ "</td>";
 						} else if(this.reservation_exist == '0') {
@@ -3469,8 +3595,7 @@
 		
 		function endTimeGenerate(startTime, runtime){
 			var divideTime = startTime.split(":");
-			alert( divideTime[0]+"시");
-			alert(divideTime[1]+"분");
+			
 			var minute = 0;
 			var hour = 0;
 			
@@ -3484,14 +3609,9 @@
 					minute = "0" + minute;
 				}
 			}
-			
-			alert(hour+"시");
-			alert(minute+"분");
-			
+
 			endTime = hour + ":" + minute;
-			alert("런타임 : " + runtime + "분");
-			alert("시작 시간 : " + startTime);
-			alert("종료 시간 : " + endTime);
+			
 		}
 
 	</script>

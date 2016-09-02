@@ -1,12 +1,8 @@
-
 package net.nigne.yzrproject.service;
-
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import net.nigne.yzrproject.domain.MemberVO;
 import net.nigne.yzrproject.persistence.MemberDAO;
 
@@ -91,5 +87,11 @@ public class MemberServiceImpl implements MemberService {
 	public MemberVO getMember(String member_id) {
 		// TODO Auto-generated method stub
 		return dao.getMember(member_id);
+	}
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void pointUpdate(String memberId, int point) {
+		
+		dao.pointUpdate(memberId, point);
 	}
 }

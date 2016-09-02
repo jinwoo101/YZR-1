@@ -114,7 +114,7 @@ public class YzrController {
       if(member_id == "" || member_id == null){
          // 기본추천영화
          List<MovieVO> rec_basic = movie_service.basicMovie();
-         List<String> basic_title = new ArrayList();
+         List<String> basic_title = new ArrayList<String>();
          
          if(!rec_basic.isEmpty()){
             basic_title.add("No.1");
@@ -195,6 +195,7 @@ public class YzrController {
             	rec_title.add("No.1");
             }else{
 	            rec_genre_movie = movie_service.getMovie(gn);
+
 	            genre = genre_service.getMovie_genre(rec_genre_movie.getMovie_id());
 	            rec_title.add("장르&nbsp<&nbsp" + genre + "&nbsp>");
             }
@@ -207,7 +208,9 @@ public class YzrController {
                }
             }
             
-            String actor = "";
+            String a = "";
+            List<String> actor = null;
+            List<String> actor2 = null;
             
             if(an == null){
             	rec_actor_movie = movie_service.basicMovie().get(1);
@@ -215,20 +218,27 @@ public class YzrController {
             }else{
 	            rec_actor_movie = movie_service.getMovie(an);
 	            actor = actor_service.getMovie_actor(member_id);
-	            rec_title.add("배우&nbsp<&nbsp" + actor + "&nbsp>");
+	            actor2 = actor_service.getActor(rec_actor_movie.getMovie_id());
+	            System.out.println(actor);
+	            System.out.println(actor2);
+	            line : for(int i=0; i<actor.size(); i++){
+	            	if(actor2.contains(actor.get(i))){
+	            		a = actor.get(i);
+	            		break line;
+	            	}
+	            }
+	            rec_title.add("배우&nbsp<&nbsp" + a + "&nbsp>");
             }
             
             // movie_id 배열에 추천감독영화 movie_id가 있는지 확인
             for(MovieVO vo : rec_director){
-            	System.out.println(vo.getMovie_id());
-                if(!list_movieId.contains(vo.getMovie_id())){
+            	if(!list_movieId.contains(vo.getMovie_id())){
              	   dn = vo.getMovie_id();
              	   break;
                 }
              }
             
             String director = "";
-            
             if(dn == null){
             	rec_director_movie = movie_service.basicMovie().get(2);
             	rec_title.add("No.3");

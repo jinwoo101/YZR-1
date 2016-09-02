@@ -156,6 +156,7 @@ section {
 				<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" style="font-weight: bold;">문의 관리 <span class="caret">
 				</span><span style="font-size: 16px;" class="pull-right hidden-xs showopacity glyphicon glyphicon-question-sign"></span></a>
 					<ul class="dropdown-menu forAnimate" role="menu">
+						<li><a href="/admin/qna">1:1 문의</a></li>
 						<li><a href="/admin/rent">대관 문의</a></li>
 						<li><a href="/admin/lost">분실물 문의</a></li>
 					</ul>

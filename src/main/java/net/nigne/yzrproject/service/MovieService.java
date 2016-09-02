@@ -26,5 +26,9 @@ public interface MovieService {
 	public List<GenreVO> getGenre(String movie_id);
 	public List<MovieVO> getMovieList(String order);
 	public List<MovieVO> getMovieId(String movieName);
+	public void addViewer(String movieId, int viewer);
+	public void updateReservationRate(MovieVO vo, float reservationRate);
+	public long getMovieCnt();
+	public List<MovieVO> getPlayMovieList();
 
 }

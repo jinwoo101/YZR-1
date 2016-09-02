@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import net.nigne.yzrproject.domain.Criteria;
 import net.nigne.yzrproject.domain.MemberVO;
 import net.nigne.yzrproject.domain.QnaVO;
+import net.nigne.yzrproject.domain.ReplyVO;
 import net.nigne.yzrproject.persistence.QnaDAO;
 
 @Service
@@ -59,5 +60,7 @@ public class QnaServiceImpl implements QnaService {
 	public QnaVO getQna(int no) {
 		// TODO Auto-generated method stub
 		return dao.getQna(no);
-	}	
+	}
+
+
 }

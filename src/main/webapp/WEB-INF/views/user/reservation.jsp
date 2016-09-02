@@ -37,6 +37,23 @@
 	<!-- 페이징 -->
 	<div id="page" style="height: auto; width: 100%; display: inline-block; text-align: center;">
 	</div>
+	
+	<div class="modal fade" id="myModal" role="dialog">
+ 		<div class="modal-dialog modal-sm"style="margin-top: 300px;">
+ 			<div class="modal-content">
+ 				<div class="modal-header">
+					<h4 class="modal-title">예매취소</h4>
+				 </div>
+ 				<div class="modal-body">
+ 					<p>예매를 취소하시겠습니까?</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal" onclick="deleteReservation()">취소확정</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 </div>
 
@@ -70,7 +87,7 @@
 					if(this.movie_id == rm[j].movie_id){
 						
 						result += '<div style="height: 140px; width: 400px; float: left;">'
-								+ '<span style="height: 138px; width: 105px; display: block; float: left;"><a href="/movie/${r.movie_id}"><img style="height: 100%; width: 100%; vertical-align: baseline;" src="/resources/images/poster/'+rm[j].poster+'"></a></span>'
+								+ '<span style="height: 138px; width: 105px; display: block; float: left;"><a href="/movie/'+this.movie_id+'"><img style="height: 100%; width: 100%; vertical-align: baseline;" src="/resources/images/poster/'+rm[j].poster+'"></a></span>'
 								+ '<span style="height:30px; display: block; margin-left: 115px; margin-bottom: 5px; padding-top:10px; font-weight: bold;"><a href="/movie/' + this.movie_id + '">' + rm[j].title + '</a></span>'
 								+ '<span class="reservationInfo">관람극장</span>'
 								+ '<span style="height:20px; display: block; margin-left: 181px; margin-bottom: 5px;">';
@@ -90,7 +107,7 @@
 								+ '<div style="height: 140px; line-height: 140px; width: 288px; text-align: center; float: left;">';
 						
 						if(this.start_time > "${today}"){
-							result += '<span style="display: inline-block; margin-top: 48px;"><button class="btn btn-danger" onclick="deleteReservation(\'' + this.reservation_code+ '\')">예매취소</button></span>';
+							result += '<span style="display: inline-block; margin-top: 48px;"><button class="btn btn-danger" onclick="setNumbers(\'' + this.reservation_code+ '\','+this.ticket_cnt+','+this.pay+',\''+this.movie_id+'\')" data-toggle="modal" data-target="#myModal">예매취소</button></span>';
 						}
 						
 						result += '</div>';
@@ -174,8 +191,20 @@
 	
 	getReservationList();
 	
-	function deleteReservation(reservation_code){
-		alert(reservation_code);
+	var reservation_code;
+	var seatCnt;
+	var pay;
+	var movieId;
+	
+	function setNumbers(reserCode, seat_cnt, won, movie_id){
+		reservation_code = reserCode;
+		seatCnt = seat_cnt;
+		pay = won;
+		movieId = movie_id;
+	}
+	
+	function deleteReservation(){
+		var seat_cnt = -seatCnt
 		$.ajax({
 			type : 'delete',
 			url : '/user/reservation/'+reservation_code,
@@ -186,10 +215,45 @@
 			success : function(result){
 				if(result == "SUCCESS"){
 					getReservationList(currentPage);
+					movieViewSubstr(movieId, seat_cnt);
+					pointSubstr(pay/100);
 				}
 			}
 		});
 		
+	}
+	
+	function pointSubstr (point) {
+		var minusPoint = -point;
+		var memberId = '${member_id}';
+		$.ajax({
+			type:'get',
+			url:'/member/point/' + minusPoint,
+			headers: {
+				"Content-Type" : "application/json",
+			},
+			dataType:'json',
+			data : '',
+			success : function(result){
+				
+			}
+		});	
+	}
+	
+	function movieViewSubstr(movieId, seatCnt) {
+		
+		$.ajax({
+			type:'get',
+			url:'/movie/viewAdder/' + movieId + '/' + seatCnt,
+			headers: {
+				"Content-Type" : "application/json",
+			},
+			dataType:'json',
+			data : '',
+			success : function(result){
+				
+			}
+		});	
 	}
 
 </script>

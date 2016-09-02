@@ -14,31 +14,29 @@
 </head>
 <body>
 <style>
-body {
-	color: #000;
-}
-
-font {
-	color: black;
-}
-
-.navbar-header {
-	width: 100%;
-	text-align: center;
-}
-
-.navbar-header>li {
-	float: none;
-	display: inline-block;
-}
-
-.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:hover,
-	.navbar-default .navbar-nav>.open>a:focus {
-	color: black;
-	background-color: ivory;
+	
+	font {
+		color: black;
+	}
+	
+	.navbar-header {
+		width: 100%;
+		text-align: center;
+	}
+	
+	.navbar-header>li {
+		float: none;
+		display: inline-block;
+	}
+	
+	.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:hover,
+		.navbar-default .navbar-nav>.open>a:focus {
+		color: black;
+		background-color: ivory;
 }
 </style>
 	<div style="position: relative;">
+		<a href="/index"><img src="/resources/images/yzr.png" height="70px" width="200px;" style="position: absolute; left: 500px; top: 95px; z-index: 100"/></a>
 		<nav class="navbar navbar-default" role="navigation"
 			style="border: 0px;">
 			<div class="container-fluid" style="padding: 0px;">
@@ -67,7 +65,7 @@ font {
 						</c:if>
 						<c:if test="${ member_id != null }">
 							<li><a href="/user"><span
-									class="glyphicon glyphicon-home"></span> 마이페이지</a></li>
+									class="glyphicon glyphicon-th"></span> 마이페이지</a></li>
 						</c:if>
 						<li><a href="/club"><span
 								class="glyphicon glyphicon-star"></span> Club서비스</a></li>

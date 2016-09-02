@@ -113,7 +113,7 @@
 					<div>관람좌석</div><span>${ reservation_list.view_seat }</span>
 				</div>
 				<div>
-					<div>관람일시</div><span>${ reservation_list.reservation_date }</span>
+					<div>관람일시</div><span>${ reservation_list.start_time }</span>
 				</div>
 				<div>
 					<div>결제</div><span>${ reservation_list.pay_method } / ${ reservation_list.pay }원</span>
